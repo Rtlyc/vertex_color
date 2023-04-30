@@ -39,7 +39,8 @@ const colorGraph = (graph) => {
   return colors;
 };
 
-const colors = colorGraph(graph);
+const coloredGraph = colorGraph(graph);
+
 
 const svg = d3
   .select("body")
@@ -82,7 +83,7 @@ const node = svg
   .append("circle")
   .attr("class", "node")
   .attr("r", radius)
-  .attr("fill", (d) => colorScale(colors[d.id]));
+  .attr("fill", (d) => colorScale(coloredGraph[d.id]));
 
 const label = svg
   .selectAll(".label")
@@ -109,3 +110,31 @@ function ticked() {
 
   label.attr("x", (d) => d.x).attr("y", (d) => d.y);
 }
+
+function updateNodeColors(colorMapping) {
+  node.attr("fill", (d) =>
+    colorMapping[d.id] ? colorScale(colorMapping[d.id]) : "lightgray"
+  );
+}
+
+
+// Initially, set all nodes to gray
+const uncoloredGraph = {};
+for (const node of graph.nodes) {
+  uncoloredGraph[node.id] = null;
+}
+updateNodeColors(uncoloredGraph);
+
+// Add event listener to the button
+const toggleColorButton = document.getElementById("toggleColor");
+let isColored = false;
+toggleColorButton.addEventListener("click", () => {
+  if (isColored) {
+    updateNodeColors(uncoloredGraph);
+    toggleColorButton.textContent = "Color Graph";
+  } else {
+    updateNodeColors(coloredGraph);
+    toggleColorButton.textContent = "Uncolor Graph";
+  }
+  isColored = !isColored;
+});
