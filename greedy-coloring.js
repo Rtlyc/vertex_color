@@ -16,7 +16,10 @@ const graph = {
   ],
 };
 
+
+
 const colorGraph = (graph) => {
+  const steps = [];
   const colors = {};
 
   for (const node of graph.nodes) {
@@ -31,17 +34,18 @@ const colorGraph = (graph) => {
     for (let color = 1; color <= graph.nodes.length; color++) {
       if (!usedColors.has(color)) {
         colors[node.id] = color;
+        steps.push({ ...colors });
         break;
       }
     }
   }
 
-  return colors;
+  return steps;
 };
 
-const coloredGraph = colorGraph(graph);
+const coloringSteps = colorGraph(graph);
 
-
+//! display
 const svg = d3
   .select("body")
   .append("svg")
@@ -83,7 +87,7 @@ const node = svg
   .append("circle")
   .attr("class", "node")
   .attr("r", radius)
-  .attr("fill", (d) => colorScale(coloredGraph[d.id]));
+  .call(drag(simulation));
 
 const label = svg
   .selectAll(".label")
@@ -111,30 +115,71 @@ function ticked() {
   label.attr("x", (d) => d.x).attr("y", (d) => d.y);
 }
 
-function updateNodeColors(colorMapping) {
-  node.attr("fill", (d) =>
-    colorMapping[d.id] ? colorScale(colorMapping[d.id]) : "lightgray"
-  );
+function drag(simulation) {
+  function dragStarted(event) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    event.subject.fx = event.subject.x;
+    event.subject.fy = event.subject.y;
+  }
+
+  function dragged(event) {
+    event.subject.fx = event.x;
+    event.subject.fy = event.y;
+  }
+
+  function dragEnded(event) {
+    if (!event.active) simulation.alphaTarget(0);
+    event.subject.fx = null;
+    event.subject.fy = null;
+  }
+
+  return d3
+    .drag()
+    .on("start", dragStarted)
+    .on("drag", dragged)
+    .on("end", dragEnded);
 }
 
 
-// Initially, set all nodes to gray
+
+
+
+// Color the graph using greedy coloring algorithm
+console.log(coloringSteps);
+// Initially, set all nodes to white
 const uncoloredGraph = {};
 for (const node of graph.nodes) {
   uncoloredGraph[node.id] = null;
 }
 updateNodeColors(uncoloredGraph);
 
-// Add event listener to the button
-const toggleColorButton = document.getElementById("toggleColor");
-let isColored = false;
-toggleColorButton.addEventListener("click", () => {
-  if (isColored) {
-    updateNodeColors(uncoloredGraph);
-    toggleColorButton.textContent = "Color Graph";
-  } else {
-    updateNodeColors(coloredGraph);
-    toggleColorButton.textContent = "Uncolor Graph";
+// Set initial step index
+let currentStep = -1;
+
+// Add event listeners to the buttons
+const backwardButton = document.getElementById("backward");
+const forwardButton = document.getElementById("forward");
+
+backwardButton.addEventListener("click", () => {
+  if (currentStep > 0) {
+    currentStep--;
+    updateNodeColors(coloringSteps[currentStep]);
   }
-  isColored = !isColored;
+  backwardButton.disabled = currentStep === 0;
+  forwardButton.disabled = false;
 });
+
+forwardButton.addEventListener("click", () => {
+  if (currentStep < coloringSteps.length - 1) {
+    currentStep++;
+    updateNodeColors(coloringSteps[currentStep]);
+  }
+  forwardButton.disabled = currentStep === coloringSteps.length - 1;
+  backwardButton.disabled = false;
+});
+
+function updateNodeColors(colorMapping) {
+    node.attr("fill", (d) =>
+      colorMapping[d.id] ? colorScale(colorMapping[d.id]) : "lightgray"
+    );
+  }
