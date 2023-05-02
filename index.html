@@ -1,34 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Greedy Coloring Algorithm Visualization</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f5f5f5;
-        }
-
-        svg {
-            background-color: #fff;
-            border: 1px solid #ccc;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graph Coloring Algorithms</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-    <!-- <button id="toggleColor">Color Graph</button> -->
-    <button id="backward" disabled>Backward</button>
-    <button id="forward">Forward</button>
-    <script src="https://d3js.org/d3.v6.min.js"></script>
-    <script src="greedy-coloring.js"></script>
+  <div class="container">
+    <header>
+      <h1>Graph Coloring Algorithms</h1>
+    </header>
+    <section class="controls">
+      <label for="algorithm">Algorithm:</label>
+      <select id="algorithm">
+        <option value="greedy">Greedy</option>
+        <option value="dsatur">DSatur</option>
+      </select>
+      <button id="backward" disabled>Backward</button>
+      <button id="forward">Forward</button>
+    </section>
+    <section id="visualization">
+    </section>
+    <section id="algorithm-description">
+      <h2>Algorithm Description</h2>
+      <p id="algorithm-explanation"></p>
+    </section>
+  </div>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="main.js"></script>
 </body>
-
 </html>
