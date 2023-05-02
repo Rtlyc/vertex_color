@@ -103,6 +103,62 @@ const colorGraphDSatur = (graph) => {
   return steps;
 };
 
+function colorGraphRLF(graph) {
+  const steps = [];
+  const colors = {};
+  const uncoloredNodes = new Set(graph.nodes.map((node) => node.id));
+  let color = 1;
+
+  while (uncoloredNodes.size > 0) {
+    const independentSet = new Set();
+    const availableNodes = new Set(uncoloredNodes);
+
+    while (availableNodes.size > 0) {
+      let maxDegreeNode = null;
+      let maxDegree = -1;
+
+      for (const nodeId of availableNodes) {
+        const nodeDegree = Array.from(uncoloredNodes).filter((n) =>
+          areNodesAdjacent(nodeId, n, graph)
+        ).length;
+
+        if (nodeDegree > maxDegree) {
+          maxDegree = nodeDegree;
+          maxDegreeNode = nodeId;
+        }
+      }
+
+      independentSet.add(maxDegreeNode);
+      availableNodes.delete(maxDegreeNode);
+
+      for (const nodeId of Array.from(availableNodes)) {
+        if (areNodesAdjacent(maxDegreeNode, nodeId, graph)) {
+          availableNodes.delete(nodeId);
+        }
+      }
+    }
+
+    for (const nodeId of independentSet) {
+      colors[nodeId] = color;
+      steps.push({ ...colors });
+      uncoloredNodes.delete(nodeId);
+    }
+
+    color++;
+  }
+
+  return steps;
+}
+
+function areNodesAdjacent(node1, node2, graph) {
+  return graph.links.some(
+    (link) =>
+      (link.source.id === node1 && link.target.id === node2) ||
+      (link.source.id === node2 && link.target.id === node1)
+  );
+}
+
+
 //! Visualization setup
 const svg = d3
   .select("#visualization")
@@ -209,6 +265,8 @@ const algorithmExplanations = {
     "The Greedy coloring algorithm is a simple and intuitive approach to vertex coloring. The algorithm iterates through the vertices of a graph, assigning the lowest available color to each vertex. The time complexity of this algorithm is O(n^2), where n is the number of vertices in the graph.",
   dsatur:
     "The DSatur (Degree of Saturation) algorithm is an improved vertex coloring algorithm that takes into account the saturation of vertices. The saturation of a vertex is the number of differently colored vertices adjacent to it. The algorithm iterates through the uncolored vertices with the highest saturation, breaking ties by choosing the vertex with the highest degree. The time complexity of this algorithm is O(n^2 + m), where n is the number of vertices and m is the number of edges in the graph.",
+  rlf:
+    "The Recursive Largest First (RLF) algorithm is a vertex coloring algorithm that finds an independent set of vertices with the largest degree and assigns the same color to them. The algorithm is then applied recursively to the remaining uncolored vertices until all vertices are colored. The time complexity of this algorithm is O(n^2 + m), where n is the number of vertices and m is the number of edges in the graph.",
 };
 
 const algorithmSelect = document.getElementById("algorithm");
@@ -228,6 +286,8 @@ algorithmSelect.addEventListener("change", () => {
     coloringSteps = colorGraph(graph);
   } else if (selectedAlgorithm === "dsatur") {
     coloringSteps = colorGraphDSatur(graph);
+  } else if (selectedAlgorithm === "rlf") {
+    coloringSteps = colorGraphRLF(graph);
   }
   // Reset step index and uncolor the graph
   currentStep = -1;
