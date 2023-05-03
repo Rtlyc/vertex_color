@@ -5,13 +5,7 @@ const radius = 20;
 
 // Graph data
 let graph = {
-  nodes: [
-    { id: "A" },
-    { id: "B" },
-    { id: "C" },
-    { id: "D" },
-    { id: "E" },
-  ],
+  nodes: [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }, { id: "E" }],
   links: [
     { source: "A", target: "B" },
     { source: "A", target: "C" },
@@ -164,37 +158,16 @@ function areNodesAdjacent(node1, node2, graph) {
 }
 
 // Visualization setup
-const svg = d3.select("#visualization").append("svg").attr("width", width).attr("height", height);
+const svg = d3
+  .select("#visualization")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height);
 
-const colorScale = d3.scaleOrdinal().domain(graph.nodes.map((node) => node.id)).range(d3.schemeCategory10);
-
-let nodeById = new Map(graph.nodes.map((node) => [node.id, node]));
-
-graph.links.forEach((link) => {
-  link.source = nodeById.get(link.source);
-  link.target = nodeById.get(link.target);
-});
-
-let simulation = d3.forceSimulation(graph.nodes)
-  .force("charge", d3.forceManyBody().strength(-400))
-  .force("link", d3.forceLink(graph.links).distance(100))
-  .force("center", d3.forceCenter(width / 2, height / 2))
-  .on("tick", ticked);
-
-// Create links
-let link = svg.selectAll(".link").data(graph.links).enter().append("line")
-  .attr("class", "link").attr("stroke", "black").attr("stroke-width", 2);
-
-// Create nodes
-let node = svg.selectAll(".node").data(graph.nodes).enter().append("circle")
-  .attr("class", "node").attr("r", radius).call(drag(simulation));
-
-// Create labels
-let label = svg.selectAll(".label").data(graph.nodes).enter().append("text")
-  .attr("class", "label").text((d) => d.id)
-  .attr("text-anchor", "middle").attr("dy", ".35em")
-  .style("pointer-events", "none").style("user-select", "none")
-  .style("font-size", "16px").style("font-weight", "bold");
+const colorScale = d3
+  .scaleOrdinal()
+  .domain(graph.nodes.map((node) => node.id))
+  .range(d3.schemeCategory10);
 
 // Update positions on tick
 function ticked() {
@@ -235,14 +208,179 @@ function drag(simulation) {
     .on("end", dragEnded);
 }
 
+// Add new buttons
+const newButton = document.getElementById("new");
+const doneButton = document.getElementById("done");
+newButton.disabled = false;
+doneButton.disabled = true;
+
+// Add event listeners for new and done buttons
+newButton.addEventListener("click", () => {
+  // Clear the graph
+  graph.nodes = [];
+  graph.links = [];
+  nodeById = new Map();
+  updateGraph();
+  // Enable adding nodes and edges
+  svg.on("click", addNode);
+  node.call(dragToAddEdges(simulation));
+  // Disable the New button and enable the Done button
+  newButton.disabled = true;
+  doneButton.disabled = false;
+});
+
+doneButton.addEventListener("click", () => {
+  // Disable adding nodes and edges
+  svg.on("click", null);
+  node.call(drag(simulation));
+  // Enable the New button and disable the Done button
+  newButton.disabled = false;
+  doneButton.disabled = true;
+});
+
+// Add node on canvas click
+function addNode(event) {
+  const newNode = { id: String.fromCharCode(65 + graph.nodes.length) };
+  graph.nodes.push(newNode);
+  nodeById.set(newNode.id, newNode);
+  const [x, y] = d3.pointer(event);
+  newNode.x = x;
+  newNode.y = y;
+  newNode.fx = x;
+  newNode.fy = y;
+  updateGraph();
+}
+
+// Drag behavior for adding edges
+function dragToAddEdges(simulation) {
+  let sourceNode = null;
+  let targetNode = null;
+  let tempEdge = null;
+
+  function dragStarted(event, d) {
+    sourceNode = d;
+    tempEdge = svg
+      .append("line")
+      .attr("class", "temp-edge")
+      .attr("stroke", "black")
+      .attr("stroke-width", 2)
+      .attr("x1", d.x)
+      .attr("y1", d.y)
+      .attr("x2", d.x)
+      .attr("y2", d.y);
+  }
+
+  function dragged(event, d) {
+    tempEdge.attr("x2", event.x).attr("y2", event.y);
+  }
+
+  function dragEnded(event, d) {
+    const [x, y] = [event.x, event.y];
+    targetNode = graph.nodes.find(
+      (node) =>
+        node !== sourceNode && Math.hypot(node.x - x, node.y - y) <= radius
+    );
+
+    if (targetNode) {
+      graph.links.push({ source: sourceNode, target: targetNode });
+      updateGraph();
+    }
+
+    tempEdge.remove();
+    tempEdge = null;
+    sourceNode = null;
+    targetNode = null;
+  }
+
+  return d3
+    .drag()
+    .on("start", dragStarted)
+    .on("drag", dragged)
+    .on("end", dragEnded);
+}
+
+let node, label, link, nodeById, simulation;
+
+// Update graph function
+function updateGraph() {
+  // Update nodes
+  node = svg.selectAll(".node").data(graph.nodes, (d) => d.id);
+  node.exit().remove();
+  node = node
+    .enter()
+    .append("circle")
+    .attr("class", "node")
+    .attr("r", radius)
+    .merge(node);
+
+  // Update labels
+  label = svg.selectAll(".label").data(graph.nodes, (d) => d.id);
+  label.exit().remove();
+  label = label
+    .enter()
+    .append("text")
+    .attr("class", "label")
+    .text((d) => d.id)
+    .attr("text-anchor", "middle")
+    .attr("dy", ".35em")
+    .style("pointer-events", "none")
+    .style("user-select", "none")
+    .style("font-size", "16px")
+    .style("font-weight", "bold")
+    .merge(label);
+
+  // Update links
+  link = svg.selectAll(".link").data(graph.links);
+  link.exit().remove();
+  link = link
+    .enter()
+    .append("line")
+    .attr("class", "link")
+    .attr("stroke", "black")
+    .attr("stroke-width", 2)
+    .merge(link);
+
+  // Update simulation
+  
+  simulation = d3
+    .forceSimulation(graph.nodes)
+    .force("charge", d3.forceManyBody().strength(-400))
+    .force("link", d3.forceLink(graph.links).distance(100))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .on("tick", ticked);
+  simulation.nodes(graph.nodes);
+  simulation.force("link").links(graph.links);
+  simulation.alpha(1).restart();
+
+  // Update nodeById
+  nodeById = new Map(graph.nodes.map((node) => [node.id, node]));
+
+  // Update links source and target
+  graph.links.forEach((link) => {
+    link.source = nodeById.get(link.source.id || link.source);
+    link.target = nodeById.get(link.target.id || link.target);
+  });
+
+  // Attach drag handlers
+  if (newButton.disabled) {
+    node.call(dragToAddEdges(simulation));
+  } else {
+    node.call(drag(simulation));
+  }
+}
+
+// Initialize the graph with an empty graph
+graph.nodes = [];
+graph.links = [];
+updateGraph();
+
 // Algorithm selection
 const algorithmExplanations = {
   greedy:
     "The Greedy coloring algorithm is a simple and intuitive approach to vertex coloring. The algorithm iterates through the vertices of a graph, assigning the lowest available color to each vertex. The time complexity of this algorithm is O(n^2), where n is the number of vertices in the graph.",
   dsatur:
     "The DSatur (Degree of Saturation) algorithm is an improved vertex coloring algorithm that takes into account the saturation of vertices. The saturation of a vertex is the number of differently colored vertices adjacent to it. The algorithm iterates through the uncolored vertices with the highest saturation, breaking ties by choosing the vertex with the highest degree. The time complexity of this algorithm is O(n^2 + m), where n is the number of vertices and m is the number of edges in the graph.",
-  rlf:
-    "The Recursive Largest First (RLF) algorithm is a vertex coloring algorithm that finds an independent set of vertices with the largest degree and assigns the same color to them. The algorithm is then applied recursively to the remaining uncolored vertices until all vertices are colored. The time complexity of this algorithm is O(n^2 + m), where n is the number of vertices and m is the number of edges in the graph.",
+  rlf: "The Recursive Largest First (RLF) algorithm is a vertex coloring algorithm that finds an independent set of vertices with the largest degree and assigns the same color to them. The algorithm is then applied recursively to the remaining uncolored vertices until all vertices are colored. The time complexity of this algorithm is O(n^2 + m), where n is the number of vertices and m is the number of edges in the graph.",
 };
 
 const algorithmSelect = document.getElementById("algorithm");
