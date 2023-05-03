@@ -4,7 +4,7 @@ const height = 600;
 const radius = 20;
 
 // Graph data
-const graph = {
+let graph = {
   nodes: [
     { id: "A" },
     { id: "B" },
@@ -168,29 +168,29 @@ const svg = d3.select("#visualization").append("svg").attr("width", width).attr(
 
 const colorScale = d3.scaleOrdinal().domain(graph.nodes.map((node) => node.id)).range(d3.schemeCategory10);
 
-const nodeById = new Map(graph.nodes.map((node) => [node.id, node]));
+let nodeById = new Map(graph.nodes.map((node) => [node.id, node]));
 
 graph.links.forEach((link) => {
   link.source = nodeById.get(link.source);
   link.target = nodeById.get(link.target);
 });
 
-const simulation = d3.forceSimulation(graph.nodes)
+let simulation = d3.forceSimulation(graph.nodes)
   .force("charge", d3.forceManyBody().strength(-400))
   .force("link", d3.forceLink(graph.links).distance(100))
   .force("center", d3.forceCenter(width / 2, height / 2))
   .on("tick", ticked);
 
 // Create links
-const link = svg.selectAll(".link").data(graph.links).enter().append("line")
+let link = svg.selectAll(".link").data(graph.links).enter().append("line")
   .attr("class", "link").attr("stroke", "black").attr("stroke-width", 2);
 
 // Create nodes
-const node = svg.selectAll(".node").data(graph.nodes).enter().append("circle")
+let node = svg.selectAll(".node").data(graph.nodes).enter().append("circle")
   .attr("class", "node").attr("r", radius).call(drag(simulation));
 
 // Create labels
-const label = svg.selectAll(".label").data(graph.nodes).enter().append("text")
+let label = svg.selectAll(".label").data(graph.nodes).enter().append("text")
   .attr("class", "label").text((d) => d.id)
   .attr("text-anchor", "middle").attr("dy", ".35em")
   .style("pointer-events", "none").style("user-select", "none")
