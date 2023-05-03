@@ -236,6 +236,23 @@ doneButton.addEventListener("click", () => {
   // Enable the New button and disable the Done button
   newButton.disabled = false;
   doneButton.disabled = true;
+
+  const selectedAlgorithm = algorithmSelect.value;
+  if (selectedAlgorithm === "greedy") {
+    coloringSteps = colorGraphGreedy(graph);
+  } else if (selectedAlgorithm === "dsatur") {
+    coloringSteps = colorGraphDSatur(graph);
+  } else if (selectedAlgorithm === "rlf") {
+    coloringSteps = colorGraphRLF(graph);
+  }
+  // Reset step index and uncolor the graph
+  currentStep = -1;
+  updateNodeColors(uncoloredGraph);
+  backwardButton.disabled = true;
+  forwardButton.disabled = false;
+
+  // Update the algorithm explanation
+  updateAlgorithmExplanation();
 });
 
 // Add node on canvas click
