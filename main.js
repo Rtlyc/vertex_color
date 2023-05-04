@@ -20,7 +20,7 @@ let graph = {
 
 // Greedy coloring algorithm
 const colorGraphGreedy = (graph) => {
-  const steps = [];
+  const steps = {coloringSteps:[], explanationSteps:[]};
   const colors = {};
 
   for (const node of graph.nodes) {
@@ -38,7 +38,8 @@ const colorGraphGreedy = (graph) => {
     for (let color = 1; color <= graph.nodes.length; color++) {
       if (!usedColors.has(color)) {
         colors[node.id] = color;
-        steps.push({ ...colors });
+        steps.coloringSteps.push({ ...colors });
+        steps.explanationSteps.push(`Color ${node.id} with color ${color}.`);
         break;
       }
     }
@@ -49,11 +50,12 @@ const colorGraphGreedy = (graph) => {
 
 // DSatur algorithm
 const colorGraphDSatur = (graph) => {
-  const steps = [];
+  const steps = {coloringSteps:[], explanationSteps:[]};
   const colors = {};
   const saturation = {};
   const degrees = {};
 
+  // initialize degrees and saturation
   for (const node of graph.nodes) {
     saturation[node.id] = 0;
     degrees[node.id] = graph.links.filter(
@@ -61,6 +63,10 @@ const colorGraphDSatur = (graph) => {
     ).length;
   }
 
+  // 1. sort based on saturation and degree
+  // 2. find the node with the highest saturation and degree
+  // 3. color the node with the lowest available color
+  // 4. update saturation of neighbors
   while (Object.keys(colors).length < graph.nodes.length) {
     const uncoloredNodes = graph.nodes.filter((node) => !colors[node.id]);
     uncoloredNodes.sort(
@@ -87,7 +93,8 @@ const colorGraphDSatur = (graph) => {
       }
     }
     colors[node.id] = color;
-    steps.push({ ...colors });
+    steps.coloringSteps.push({ ...colors });
+    steps.explanationSteps.push(`Color ${node.id} with color ${color}.`);
 
     for (const link of graph.links) {
       if (link.source.id === node.id || link.target.id === node.id) {
@@ -105,11 +112,16 @@ const colorGraphDSatur = (graph) => {
 
 // Recursive largest first algorithm
 function colorGraphRLF(graph) {
-  const steps = [];
+  const steps = {coloringSteps:[], explanationSteps:[]};
   const colors = {};
   const uncoloredNodes = new Set(graph.nodes.map((node) => node.id));
   let color = 1;
 
+  // 1. initialize independent set and available nodes 
+  // 2. find the node with the highest degree
+  // 3. delete the node and its neighbors from available nodes
+  // 4. continue to find the node with the highest degree
+  // 5. color the node with the lowest available color
   while (uncoloredNodes.size > 0) {
     const independentSet = new Set();
     const availableNodes = new Set(uncoloredNodes);
@@ -141,7 +153,8 @@ function colorGraphRLF(graph) {
 
     for (const nodeId of independentSet) {
       colors[nodeId] = color;
-      steps.push({ ...colors });
+      steps.coloringSteps.push({ ...colors });
+      steps.explanationSteps.push(`Color ${nodeId} with color ${color}.`);
       uncoloredNodes.delete(nodeId);
     }
 
@@ -241,12 +254,14 @@ doneButton.addEventListener("click", () => {
 
   const selectedAlgorithm = algorithmSelect.value;
   if (selectedAlgorithm === "greedy") {
-    coloringSteps = colorGraphGreedy(graph);
+    Steps = colorGraphGreedy(graph);
   } else if (selectedAlgorithm === "dsatur") {
-    coloringSteps = colorGraphDSatur(graph);
+    Steps = colorGraphDSatur(graph);
   } else if (selectedAlgorithm === "rlf") {
-    coloringSteps = colorGraphRLF(graph);
+    Steps = colorGraphRLF(graph);
   }
+  coloringSteps = Steps.coloringSteps;
+  explanationSteps = Steps.explanationSteps;
   // Reset step index and uncolor the graph
   currentStep = -1;
   updateNodeColors(uncoloredGraph);
@@ -412,12 +427,14 @@ updateAlgorithmExplanation();
 algorithmSelect.addEventListener("change", () => {
   const selectedAlgorithm = algorithmSelect.value;
   if (selectedAlgorithm === "greedy") {
-    coloringSteps = colorGraphGreedy(graph);
+    Steps = colorGraphGreedy(graph);
   } else if (selectedAlgorithm === "dsatur") {
-    coloringSteps = colorGraphDSatur(graph);
+    Steps = colorGraphDSatur(graph);
   } else if (selectedAlgorithm === "rlf") {
-    coloringSteps = colorGraphRLF(graph);
+    Steps = colorGraphRLF(graph);
   }
+  coloringSteps = Steps.coloringSteps;
+  explanationSteps = Steps.explanationSteps;
   // Reset step index and uncolor the graph
   currentStep = -1;
   updateNodeColors(uncoloredGraph);
@@ -428,7 +445,9 @@ algorithmSelect.addEventListener("change", () => {
   updateAlgorithmExplanation();
 });
 
-let coloringSteps = colorGraphGreedy(graph);
+let Steps = colorGraphGreedy(graph);
+let coloringSteps = Steps.coloringSteps;
+let explanationSteps = Steps.explanationSteps;
 
 // Set initial node colors
 const uncoloredGraph = {};
@@ -448,6 +467,7 @@ backwardButton.addEventListener("click", () => {
   if (currentStep > 0) {
     currentStep--;
     updateNodeColors(coloringSteps[currentStep]);
+    updateExplanation(explanationSteps[currentStep]);
   }
   backwardButton.disabled = currentStep === 0;
   forwardButton.disabled = false;
@@ -457,10 +477,16 @@ forwardButton.addEventListener("click", () => {
   if (currentStep < coloringSteps.length - 1) {
     currentStep++;
     updateNodeColors(coloringSteps[currentStep]);
+    updateExplanation(explanationSteps[currentStep]);
   }
   forwardButton.disabled = currentStep === coloringSteps.length - 1;
   backwardButton.disabled = false;
 });
+
+function updateExplanation(info) {
+  let infoBox = document.getElementById("explanation");
+  infoBox.innerText = info;
+}
 
 // Function to update node colors
 function updateNodeColors(colorMapping) {
