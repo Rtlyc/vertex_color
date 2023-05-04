@@ -4,6 +4,7 @@ const height = 600;
 const radius = 20;
 
 // Graph data
+let allnode, label, link, nodeById, simulation;
 let graph = {
   nodes: [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }, { id: "E" }],
   links: [
@@ -15,6 +16,7 @@ let graph = {
     { source: "D", target: "E" },
   ],
 };
+
 
 // Greedy coloring algorithm
 const colorGraphGreedy = (graph) => {
@@ -177,7 +179,7 @@ function ticked() {
     .attr("x2", (d) => d.target.x)
     .attr("y2", (d) => d.target.y);
 
-  node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+  allnode.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
 
   label.attr("x", (d) => d.x).attr("y", (d) => d.y);
 }
@@ -223,7 +225,7 @@ newButton.addEventListener("click", () => {
   updateGraph();
   // Enable adding nodes and edges
   svg.on("click", addNode);
-  node.call(dragToAddEdges(simulation));
+  allnode.call(dragToAddEdges(simulation));
   // Disable the New button and enable the Done button
   newButton.disabled = true;
   doneButton.disabled = false;
@@ -232,7 +234,7 @@ newButton.addEventListener("click", () => {
 doneButton.addEventListener("click", () => {
   // Disable adding nodes and edges
   svg.on("click", null);
-  node.call(drag(simulation));
+  allnode.call(drag(simulation));
   // Enable the New button and disable the Done button
   newButton.disabled = false;
   doneButton.disabled = true;
@@ -316,19 +318,17 @@ function dragToAddEdges(simulation) {
     .on("end", dragEnded);
 }
 
-let node, label, link, nodeById, simulation;
-
 // Update graph function
 function updateGraph() {
   // Update nodes
-  node = svg.selectAll(".node").data(graph.nodes, (d) => d.id);
-  node.exit().remove();
-  node = node
+  allnode = svg.selectAll(".node").data(graph.nodes, (d) => d.id);
+  allnode.exit().remove();
+  allnode = allnode
     .enter()
     .append("circle")
     .attr("class", "node")
     .attr("r", radius)
-    .merge(node);
+    .merge(allnode);
 
   // Update labels
   label = svg.selectAll(".label").data(graph.nodes, (d) => d.id);
@@ -357,18 +357,6 @@ function updateGraph() {
     .attr("stroke-width", 2)
     .merge(link);
 
-  // Update simulation
-  
-  simulation = d3
-    .forceSimulation(graph.nodes)
-    .force("charge", d3.forceManyBody().strength(-400))
-    .force("link", d3.forceLink(graph.links).distance(100))
-    .force("center", d3.forceCenter(width / 2, height / 2))
-    .on("tick", ticked);
-  simulation.nodes(graph.nodes);
-  simulation.force("link").links(graph.links);
-  simulation.alpha(1).restart();
-
   // Update nodeById
   nodeById = new Map(graph.nodes.map((node) => [node.id, node]));
 
@@ -378,18 +366,29 @@ function updateGraph() {
     link.target = nodeById.get(link.target.id || link.target);
   });
 
+  // Update simulation
+  simulation = d3
+    .forceSimulation(graph.nodes)
+    .force("charge", d3.forceManyBody().strength(-400))
+    .force("link", d3.forceLink(graph.links).distance(100))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .on("tick", ticked);
+
+  simulation.nodes(graph.nodes);
+  simulation.force("link").links(graph.links);
+  simulation.alpha(1).restart();
+
   // Attach drag handlers
   if (newButton.disabled) {
-    node.call(dragToAddEdges(simulation));
+    allnode.call(dragToAddEdges(simulation));
   } else {
-    node.call(drag(simulation));
+    allnode.call(drag(simulation));
   }
 }
 
 // Initialize the graph with an empty graph
-graph.nodes = [];
-graph.links = [];
-updateGraph();
+updateGraph(); 
+
 
 // Algorithm selection
 const algorithmExplanations = {
@@ -465,7 +464,7 @@ forwardButton.addEventListener("click", () => {
 
 // Function to update node colors
 function updateNodeColors(colorMapping) {
-  node.attr("fill", (d) =>
+  allnode.attr("fill", (d) =>
     colorMapping[d.id] ? colorScale(colorMapping[d.id]) : "lightgray"
   );
 }
