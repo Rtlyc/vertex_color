@@ -24,29 +24,43 @@ const colorGraphGreedy = (graph) => {
   const colors = {};
 
   for (const node of graph.nodes) {
-    const usedColors = new Set(
-      graph.links
-        .filter(
-          (link) => link.source.id === node.id || link.target.id === node.id
-        )
-        .map(
-          (link) =>
-            colors[link.source.id === node.id ? link.target.id : link.source.id]
-        )
+    const usedColors = new Map();
+
+    let connectedNodes = graph.links.filter(
+      (link) => link.source.id === node.id || link.target.id === node.id
+    ).map(
+      (link) => link.source.id === node.id ? link.target.id : link.source.id
     );
+
+    connectedNodes.forEach(connectedNode => {
+      if(colors[connectedNode]) {
+        usedColors.set(colors[connectedNode], connectedNode);
+      }
+    });
+
+    let text = "";
+    if (node === graph.nodes[0]) {
+      text += `Going through A to Z, color with the lowest available color. `;
+    }
 
     for (let color = 1; color <= graph.nodes.length; color++) {
       if (!usedColors.has(color)) {
         colors[node.id] = color;
         steps.coloringSteps.push({ ...colors });
-        steps.explanationSteps.push(`Color ${node.id} with color ${color}.`);
+
+        // Add explanation why we choose this color
+        let usedColorText = Array.from(usedColors, ([usedColor, nodeId]) => usedColor < color ? `color ${usedColor} by node ${nodeId}` : null).filter(Boolean).join(', ');
+        text += `Color ${node.id} with color ${color} because ${usedColorText ? `the following colors were already in use: ${usedColorText}` : 'it is the lowest available color'}. `;
+        steps.explanationSteps.push(text);
         break;
       }
     }
   }
-
   return steps;
 };
+
+
+
 
 // DSatur algorithm
 const colorGraphDSatur = (graph) => {
@@ -239,6 +253,7 @@ newButton.addEventListener("click", () => {
   // Enable adding nodes and edges
   svg.on("click", addNode);
   allnode.call(dragToAddEdges(simulation));
+  updateNodeColors(uncoloredGraph);
   // Disable the New button and enable the Done button
   newButton.disabled = true;
   doneButton.disabled = false;
@@ -411,7 +426,7 @@ const algorithmExplanations = {
     "The Greedy coloring algorithm is a simple and intuitive approach to vertex coloring. The algorithm iterates through the vertices of a graph, assigning the lowest available color to each vertex. The time complexity of this algorithm is O(n^2), where n is the number of vertices in the graph.",
   dsatur:
     "The DSatur (Degree of Saturation) algorithm is an improved vertex coloring algorithm that takes into account the saturation of vertices. The saturation of a vertex is the number of differently colored vertices adjacent to it. The algorithm iterates through the uncolored vertices with the highest saturation, breaking ties by choosing the vertex with the highest degree. The time complexity of this algorithm is O(n^2 + m), where n is the number of vertices and m is the number of edges in the graph.",
-  rlf: "The Recursive Largest First (RLF) algorithm is a vertex coloring algorithm that finds an independent set of vertices with the largest degree and assigns the same color to them. The algorithm is then applied recursively to the remaining uncolored vertices until all vertices are colored. The time complexity of this algorithm is O(n^2 + m), where n is the number of vertices and m is the number of edges in the graph.",
+  rlf: "The Recursive Largest First (RLF) algorithm is a vertex coloring algorithm that finds an independent set of vertices with the largest degree and assigns the same color to them. The algorithm is then applied recursively to the remaining uncolored vertices until all vertices are colored. The time complexity of this algorithm is O(n^3), where n is the number of vertices.",
 };
 
 const algorithmSelect = document.getElementById("algorithm");
