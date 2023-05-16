@@ -71,11 +71,18 @@ const colorGraphDSatur = (graph) => {
 
   // initialize degrees and saturation
   for (const node of graph.nodes) {
-    saturation[node.id] = 0;
     degrees[node.id] = graph.links.filter(
       (link) => link.source.id === node.id || link.target.id === node.id
     ).length;
+    saturation[node.id] = 0;
   }
+
+  // Initial explanation of degrees
+  let degreeExplanation = Object.entries(degrees)
+    .map(([node, degree]) => `Node ${node} has degree ${degree}`)
+    .join(', ');
+  steps.explanationSteps.push(`Initial degrees: ${degreeExplanation}. Initial saturations are all zeros. We choose the node with the highest degree and saturation.`);
+  steps.coloringSteps.push({ ...colors });
 
   // 1. sort based on saturation and degree
   // 2. find the node with the highest saturation and degree
@@ -107,8 +114,6 @@ const colorGraphDSatur = (graph) => {
       }
     }
     colors[node.id] = color;
-    steps.coloringSteps.push({ ...colors });
-    steps.explanationSteps.push(`Color ${node.id} with color ${color}.`);
 
     for (const link of graph.links) {
       if (link.source.id === node.id || link.target.id === node.id) {
@@ -119,10 +124,26 @@ const colorGraphDSatur = (graph) => {
         }
       }
     }
+
+    // Update and explain saturation of uncolored nodes
+    let saturationExplanation = Object.entries(saturation)
+      .filter(([node]) => !colors[node])
+      .map(([node, saturation]) => `Node ${node} has saturation ${saturation}`)
+      .join(', ');
+
+    // Update and explain degrees of uncolored nodes
+    let updatedDegreeExplanation = Object.entries(degrees)
+      .filter(([node]) => !colors[node])
+      .map(([node, degree]) => `Node ${node} has degree ${degree}`)
+      .join(', ');
+
+    steps.explanationSteps.push(`Colored ${node.id} with color ${color}. Uncolored Degrees: ${updatedDegreeExplanation}. Updated saturations: ${saturationExplanation}. `);
+    steps.coloringSteps.push({ ...colors });
   }
 
   return steps;
 };
+
 
 // Recursive largest first algorithm
 function colorGraphRLF(graph) {
