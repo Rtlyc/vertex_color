@@ -5,17 +5,112 @@ const radius = 20;
 
 // Graph data
 let allnode, label, link, nodeById, simulation;
-let graph = {
-  nodes: [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }, { id: "E" }],
-  links: [
-    { source: "A", target: "B" },
-    { source: "A", target: "C" },
-    { source: "B", target: "C" },
-    { source: "B", target: "D" },
-    { source: "C", target: "D" },
-    { source: "D", target: "E" },
-  ],
+
+// Define your graphs
+const graphs = {
+  graph1: {
+    nodes: [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }],
+    links: [
+      { source: "A", target: "D" },
+      { source: "B", target: "C" },
+      { source: "C", target: "D" },
+    ],
+  },
+  graph2: {
+    nodes: [
+      { id: "A" },
+      { id: "B" },
+      { id: "C" },
+      { id: "D" },
+      { id: "E" },
+      { id: "F" },
+      { id: "G" },
+      { id: "H" }
+    ],
+    links: [
+      { source: {id: "A"}, target: {id: "D"} },
+      { source: {id: "A"}, target: {id: "F"} },
+      { source: {id: "A"}, target: {id: "H"} },
+      { source: {id: "C"}, target: {id: "B"} },
+      { source: {id: "C"}, target: {id: "F"} },
+      { source: {id: "C"}, target: {id: "H"} },
+      { source: {id: "E"}, target: {id: "B"} },
+      { source: {id: "E"}, target: {id: "D"} },
+      { source: {id: "E"}, target: {id: "H"} },
+      { source: {id: "G"}, target: {id: "B"} },
+      { source: {id: "G"}, target: {id: "D"} },
+      { source: {id: "G"}, target: {id: "F"} },
+    ]
+  },
+  graph3: {
+    nodes: [
+      { id: "A" },
+      { id: "B" },
+      { id: "C" },
+      { id: "D" },
+      { id: "E" },
+      { id: "F" },
+      { id: "G" },
+      { id: "H" }
+    ],
+    links:[
+      { source: {id: "A"}, target: {id: "B"} },
+      { source: {id: "A"}, target: {id: "C"} },
+      { source: {id: "A"}, target: {id: "D"} },
+      { source: {id: "A"}, target: {id: "G"} },
+      { source: {id: "B"}, target: {id: "E"} },
+      { source: {id: "B"}, target: {id: "F"} },
+      { source: {id: "C"}, target: {id: "G"} },
+      { source: {id: "D"}, target: {id: "G"} },
+      { source: {id: "E"}, target: {id: "F"} },
+      { source: {id: "E"}, target: {id: "H"} },
+      { source: {id: "F"}, target: {id: "H"} },
+      { source: {id: "G"}, target: {id: "H"} },
+    ]
+  },
+  graph4: {
+    nodes: [
+      { id: "A" },
+      { id: "B" },
+      { id: "C" },
+      { id: "D" },
+      { id: "E" }
+    ],
+    links: [
+      { source: {id: "A"}, target: {id: "B"} },
+      { source: {id: "B"}, target: {id: "C"} },
+      { source: {id: "C"}, target: {id: "D"} },
+      { source: {id: "D"}, target: {id: "E"} },
+      { source: {id: "E"}, target: {id: "A"} }
+    ]  
+  },
+  graph5: {
+    nodes: [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }, { id: "E" }, { id: "F" }, { id: "G"}],
+    links: [
+      { source: "A", target: "B" },
+      { source: "A", target: "C" },
+      { source: "B", target: "C" },
+      { source: "A", target: "D" },
+      { source: "B", target: "E" },
+      { source: "E", target: "F" },
+      { source: "D", target: "F" },
+      { source: "D", target: "G" },
+      { source: "E", target: "G" },
+      { source: "F", target: "G" },
+    ],
+  },
 };
+
+let graph = graphs.graph1;
+
+// Graph selection
+const graphSelect = document.getElementById("graph");
+graphSelect.addEventListener("change", () => {
+  const selectedGraph = graphSelect.value;
+  graph = graphs[selectedGraph];
+  updateGraph();
+  updateNodeSteps();
+});
 
 
 // Greedy coloring algorithm
@@ -483,24 +578,7 @@ function updateAlgorithmExplanation() {
 updateAlgorithmExplanation();
 
 algorithmSelect.addEventListener("change", () => {
-  const selectedAlgorithm = algorithmSelect.value;
-  if (selectedAlgorithm === "greedy") {
-    Steps = colorGraphGreedy(graph);
-  } else if (selectedAlgorithm === "dsatur") {
-    Steps = colorGraphDSatur(graph);
-  } else if (selectedAlgorithm === "rlf") {
-    Steps = colorGraphRLF(graph);
-  }
-  coloringSteps = Steps.coloringSteps;
-  explanationSteps = Steps.explanationSteps;
-  // Reset step index and uncolor the graph
-  currentStep = -1;
-  updateNodeColors(uncoloredGraph);
-  backwardButton.disabled = true;
-  forwardButton.disabled = false;
-
-  // Update the algorithm explanation
-  updateAlgorithmExplanation();
+  updateNodeSteps();
 });
 
 let Steps = colorGraphGreedy(graph);
@@ -551,4 +629,26 @@ function updateNodeColors(colorMapping) {
   allnode.attr("fill", (d) =>
     colorMapping[d.id] ? colorScale(colorMapping[d.id]) : "lightgray"
   );
+}
+
+// Function to update node steps
+function updateNodeSteps(){
+  const selectedAlgorithm = algorithmSelect.value;
+  if (selectedAlgorithm === "greedy") {
+    Steps = colorGraphGreedy(graph);
+  } else if (selectedAlgorithm === "dsatur") {
+    Steps = colorGraphDSatur(graph);
+  } else if (selectedAlgorithm === "rlf") {
+    Steps = colorGraphRLF(graph);
+  }
+  coloringSteps = Steps.coloringSteps;
+  explanationSteps = Steps.explanationSteps;
+  // Reset step index and uncolor the graph
+  currentStep = -1;
+  updateNodeColors(uncoloredGraph);
+  backwardButton.disabled = true;
+  forwardButton.disabled = false;
+
+  // Update the algorithm explanation
+  updateAlgorithmExplanation();
 }
