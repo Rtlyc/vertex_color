@@ -152,6 +152,22 @@ function colorGraphRLF(graph) {
   const uncoloredNodes = new Set(graph.nodes.map((node) => node.id));
   let color = 1;
 
+  // Get the degree of a node
+  const getDegree = (nodeId) => Array.from(uncoloredNodes).filter((n) => areNodesAdjacent(nodeId, n, graph)).length;
+
+  // Initialize degrees
+  const degrees = {};
+  for (const node of graph.nodes) {
+    degrees[node.id] = getDegree(node.id);
+  }
+
+  // Explanation for initial degrees
+  let degreeExplanation = Object.entries(degrees)
+    .map(([node, degree]) => `Node ${node} has degree ${degree}`)
+    .join(', ');
+  steps.explanationSteps.push(`Initial degrees: ${degreeExplanation}.`);
+  steps.coloringSteps.push({ ...colors });
+
   // 1. initialize independent set and available nodes 
   // 2. find the node with the highest degree
   // 3. delete the node and its neighbors from available nodes
@@ -166,9 +182,7 @@ function colorGraphRLF(graph) {
       let maxDegree = -1;
 
       for (const nodeId of availableNodes) {
-        const nodeDegree = Array.from(uncoloredNodes).filter((n) =>
-          areNodesAdjacent(nodeId, n, graph)
-        ).length;
+        const nodeDegree = getDegree(nodeId);
 
         if (nodeDegree > maxDegree) {
           maxDegree = nodeDegree;
@@ -178,6 +192,8 @@ function colorGraphRLF(graph) {
 
       independentSet.add(maxDegreeNode);
       availableNodes.delete(maxDegreeNode);
+      steps.explanationSteps.push(`Adding node ${maxDegreeNode} with degree ${maxDegree} to the independent set.`);
+      steps.coloringSteps.push({ ...colors });
 
       for (const nodeId of Array.from(availableNodes)) {
         if (areNodesAdjacent(maxDegreeNode, nodeId, graph)) {
@@ -185,6 +201,11 @@ function colorGraphRLF(graph) {
         }
       }
     }
+
+    // Explanation for independent set and degrees of unadjacent nodes
+    const independentSetExplanation = `Independent set: ${Array.from(independentSet).join(', ')}.`;
+    steps.explanationSteps.push(`${independentSetExplanation}`);
+    steps.coloringSteps.push({ ...colors });
 
     for (const nodeId of independentSet) {
       colors[nodeId] = color;
@@ -198,6 +219,7 @@ function colorGraphRLF(graph) {
 
   return steps;
 }
+
 
 function areNodesAdjacent(node1, node2, graph) {
   return graph.links.some(
