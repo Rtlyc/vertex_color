@@ -1,32 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About - Graph Coloring Algorithms</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Graph Coloring Algorithms</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <div class="container">
-    <header>
-      <h1>About</h1>
-      <nav>
-        <a href="index.html">Home</a> |
-        <a href="about.html">About</a>
-      </nav>
-    </header>
-    <section id="greedy-description">
-      <h2>Greedy Algorithm</h2>
-      <p><!-- Include explanation here --></p>
-    </section>
-    <section id="dsatur-description">
-      <h2>DSatur Algorithm</h2>
-      <p><!-- Include explanation here --></p>
-    </section>
-    <section id="rlf-description">
-      <h2>Recursive Largest First (RLF) Algorithm</h2>
-      <p><!-- Include explanation here --></p>
-    </section>
-  </div>
+    <div class="container">
+        <header>
+            <h1>About</h1>
+            <nav>
+                <a href="index.html">Home</a> |
+                <a href="about.html">About</a>
+            </nav>
+        </header>
+        <section id="intro">
+            In graph theory, graph coloring is a special case of graph labeling; it is an assignment of labels
+            traditionally called "colors" to elements of a graph subject to certain constraints. In its simplest form,
+            it is a way of coloring the vertices of a graph such that no two adjacent vertices are of the same color;
+            this is called a vertex coloring. In this project, I have implemented three graph coloring algorithms:
+            Greedy, DSatur, and Recursive Largest First (RLF). You can visualize the working of these algorithms by
+            selecting a graph and an algorithm from the dropdown menus. You can also generate a new graph and start the
+            visualization from the beginning. The visualization will show you the steps of the algorithm along with an
+            explanation of what is happening at each step. I hope this project will help you understand the workings of
+            the algorithm and further the interest.
+        </section>
+        <section id="functionality-description">
+            <h2>Features</h2>
+            <ul>
+                <li>
+                    <strong>Graph Section:</strong>
+                    I have listed the graphs that I used for testing the optimality of three algorithms. You can select
+                    any of these graphs to visualize the algorithm.
+                </li>
+                <li>
+                    <strong>Algorithm Selection:</strong>
+                    You can select the graph coloring algorithm you want to visualize from the dropdown menu. The
+                    available algorithms are Greedy, DSatur, and Recursive Largest First (RLF).
+                </li>
+                <li>
+                    <strong>Navigation Buttons:</strong>
+                    Use the "Forward" and "Backward" buttons to navigate through the steps of the selected algorithm.
+                    The "Backward" button will be disabled at the beginning, and the "Forward" button will be disabled
+                    after the last step.
+                </li>
+                <li>
+                    <strong>New & Done Button:</strong>
+                    The "New" button allows you to generate a new customized graph for visualization. Once a new graph
+                    is generated, you can start the visualization from the beginning.When you have finished with the
+                    visualization, you can click the "Done" button to finish the current
+                    session.
+                </li>
+                <li>
+                    <strong>Explanation Section:</strong>
+                    As you navigate through the steps of the algorithm, the Explanation section will update with a
+                    description of what is happening at each step. This will help you understand the workings of the
+                    algorithm.
+                </li>
+            </ul>
+        </section>
+        <section id="algorithm">
+            <h2>Algorithms</h2>
+            <section id="greedy-description">
+                <h3>Greedy Algorithm</h3>
+                <p>The Greedy coloring algorithm is a simple and intuitive approach to vertex coloring <a
+                        href="#ref1">[1]</a>. The algorithm iterates through the vertices of a graph, assigning the
+                    lowest available color to each vertex. The time complexity of this algorithm is O(n^2), where n is
+                    the number of vertices in the graph.</p>
+            </section>
+            <section id="dsatur-description">
+                <h3>DSatur Algorithm</h3>
+                <p>The DSatur (Degree of Saturation) <a href="#ref2">[2]</a> algorithm is an improved vertex coloring
+                    algorithm that takes into account the saturation of vertices. The saturation of a vertex is the
+                    number of differently colored vertices adjacent to it. The algorithm iterates through the uncolored
+                    vertices with the highest saturation, breaking ties by choosing the vertex with the highest degree.
+                <p>
+                    The steps of the DSatur algorithm are as follows:
+                <ol>
+                    <li>
+                        Start by assigning a color to a node (usually the one with the highest degree).
+                    </li>
+                    <li>Then, in each subsequent step, select the uncolored node with the highest saturation degree. If there is a tie, choose the node with the highest degree.</li>
+                    <li>Assign the smallest possible color to this node. This is the smallest color that has not been
+                        assigned to any of its neighbors.</li>
+                    <li>Update the saturation degrees of all uncolored nodes.</li>
+                    <li>Repeat steps 2-4 until all nodes are colored.</li>
+
+                </ol>
+
+                </p>
+                The time complexity of this algorithm is O(n^2), where n is the number of vertices. The algorithm can
+                also be implemented using a binary heap to store saturation degrees, operating in O((n+m)logn), where m
+                is the number of edges in the graph.
+                </p>
+            </section>
+            <section id="rlf-description">
+                <h3>Recursive Largest First (RLF) Algorithm</h3>
+                <p>The Recursive Largest First (RLF) algorithm <a href="#ref3">[3]</a> is a vertex coloring algorithm
+                    that finds an independent set of vertices with the largest degree and assigns the same color to
+                    them. The algorithm is then applied recursively to the remaining uncolored vertices until all
+                    vertices are colored. 
+                    
+                    <p>
+                        The steps of the RLF algorithm are as follows:
+                    <ol>
+                        <li>
+                            Start by identifying the node with the highest degree in the graph.
+                        </li>
+                        <li>Form an independent set starting with this node, then adding the nodes with the highest degrees from the remaining nodes, ensuring that no nodes in the set are adjacent to each other.</li>
+                        <li>Assign a new color to all the nodes in this independent set.</li>
+                        <li>Remove the colored nodes from the graph.</li>
+                        <li>Repeat steps 2-4 on the remaining uncolored graph until all nodes are colored.</li>
+                    </ol>
+
+                    Let n be the number of vertices in the graph and let m be the number of edges.
+                    Using big O notation, in his original publication Leighton states the complexity of RLF to be
+                    O(n^3); however, this can be improved upon. Much of the expense of this algorithm is due to the
+                    step, where vertex selection is made according to heuristic rules. Each time a vertex is selected
+                    for addition to the independent set S, information regarding the neighbors needs to be recalculated
+                    for each uncolored vertex. These calculation can be performed in O(m) time, meaning that the overall
+                    complexity of RLF is O(mn).</p>
+                <p>
+                    In an empirical comparison by Lewis in 2021 <a href="#ref4">[4]</a>, RLF was shown to produce
+                    significantly better results than the DSatur algorithm .
+                </p>
+            </section>
+        </section>
+        <section id="comparison-table">
+            <h2>Comparison</h2>
+            I have listed 5 example graphs to show the differences between the algorithms. ✅ means that the algorithm achieves the optimal coloring, and ❌ means that it does not.
+            <table>
+              <tr>
+                <th>Algorithms</th>
+                <th>Greedy</th>
+                <th>DSatur</th>
+                <th>RLF</th>
+              </tr>
+              <tr>
+                <td>Graph 1</td>
+                <td>❌</td>
+                <td>✅</td>
+                <td>✅</td>
+              </tr>
+              <tr>
+                <td>Graph 2</td>
+                <td>❌</td>
+                <td>✅</td>
+                <td>❌</td>
+              </tr>
+              <tr>
+                <td>Graph 3</td>
+                <td>✅</td>
+                <td>❌</td>
+                <td>✅</td>
+              </tr>
+              <tr>
+                <td>Graph 4</td>
+                <td>❌</td>
+                <td>❌</td>
+                <td>❌</td>
+              </tr>
+              <tr>
+                <td>Graph 5</td>
+                <td>❌</td>
+                <td>❌</td>
+                <td>❌</td>
+              </tr>
+            </table>
+          </section>
+
+        <section id="more">
+            <h2>More..</h2>
+            <p>
+            JanczewskiM. worked on slightly hard-to-color(SHC) if some implementation of the algorithm uses more colors than the chromatic number. As well as what a graph is said to be hard-to-color if every implementation of the algorithm results in a non-optimal coloring. More specifically, they studied the smallest of such graphs for the Dsatur vertex coloring algorithm. <a href="#ref5">[5]</a> 
+            </p>
+            <p>
+                Adegbindin proposed a new efficient RLF-like algorithm <a href="#ref6">[6]</a> for the vertex coloring problem. Computational experiments on 63 difficult DIMACS instances show that the resulting new RLF-like algorithm, when compared with the standard RLF, allows to obtain a reduction of more than 50% of the gap between the number of colors used and the best known upper bound on the chromatic number.
+            </p>
+            <p>
+                Application: PageRank. <a href="#ref7">[7]</a> PageRank is an algorithm used by Google Search to rank web pages in their search engine results. PageRank was named after Larry Page, one of the founders of Google. The algorithm is designed to measure the importance of web pages and is based on the logical assumption that more important websites are likely to receive more links from other websites.
+            </p>
+
+        </section>
+          
+        <section id="references">
+            <h2>References</h2>
+            <ol>
+                <li id="ref1"> Greedy coloring. In Wikipedia. https://en.wikipedia.org/wiki/Greedy_coloring</a></li>
+                <li id="ref2"> Daniel Brélaz. 1979. New methods to color the vertices of a graph. Commun. ACM 22, 4
+                    (April 1979), 251–256. https://doi.org/10.1145/359094.359101</a></li>
+                <li id="ref3"> Leighton, F. (1979). "A graph coloring algorithm for large scheduling problems". Journal
+                    of Research of the National Bureau of Standards. 84 (6): 489–503. doi:10.6028/jres.084.024. PMC
+                    6756213. PMID 34880531.</a></li>
+                <li id="ref4"> Lewis, R. (2021). A Guide to Graph Colouring: Algorithms and Applications. Texts in
+                    Computer Science. Springer. doi:10.1007/978-3-030-81054-2. ISBN 978-3-030-81053-5. S2CID
+                    57188465</a></li>
+                <li id="ref5"> R. JanczewskiM. KubaleK. ManuszewskiK. Piwakowski2001Elsevier Science B.V.DOI:10.1016/S0012-365X(00)00439-8</li>
+                <li id="ref6"> Adegbindin, Mourchid & Hertz, Alain & Bellaiche, Martine. (2016). A new efficient RLF-like algorithm for the vertex coloring problem. Yugoslav Journal of Operations Research. 26. 3-3. 10.2298/YJOR151102003A. </li>
+                <li id="ref7">
+                    PageRank. In Wikipedia. https://en.wikipedia.org/wiki/PageRank
+                </li>
+            </ol>
+        </section>
+    </div>
 </body>
+
 </html>

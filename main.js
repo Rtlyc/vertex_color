@@ -558,24 +558,7 @@ function updateGraph() {
 updateGraph(); 
 
 
-// Algorithm selection
-const algorithmExplanations = {
-  greedy:
-    "The Greedy coloring algorithm is a simple and intuitive approach to vertex coloring. The algorithm iterates through the vertices of a graph, assigning the lowest available color to each vertex. The time complexity of this algorithm is O(n^2), where n is the number of vertices in the graph.",
-  dsatur:
-    "The DSatur (Degree of Saturation) algorithm is an improved vertex coloring algorithm that takes into account the saturation of vertices. The saturation of a vertex is the number of differently colored vertices adjacent to it. The algorithm iterates through the uncolored vertices with the highest saturation, breaking ties by choosing the vertex with the highest degree. The time complexity of this algorithm is O(n^2 + m), where n is the number of vertices and m is the number of edges in the graph.",
-  rlf: "The Recursive Largest First (RLF) algorithm is a vertex coloring algorithm that finds an independent set of vertices with the largest degree and assigns the same color to them. The algorithm is then applied recursively to the remaining uncolored vertices until all vertices are colored. The time complexity of this algorithm is O(n^3), where n is the number of vertices.",
-};
-
 const algorithmSelect = document.getElementById("algorithm");
-
-function updateAlgorithmExplanation() {
-  const selectedAlgorithm = algorithmSelect.value;
-  const explanation = algorithmExplanations[selectedAlgorithm];
-  document.getElementById("algorithm-explanation").textContent = explanation;
-}
-
-updateAlgorithmExplanation();
 
 algorithmSelect.addEventListener("change", () => {
   updateNodeSteps();
@@ -649,6 +632,4 @@ function updateNodeSteps(){
   backwardButton.disabled = true;
   forwardButton.disabled = false;
 
-  // Update the algorithm explanation
-  updateAlgorithmExplanation();
 }
